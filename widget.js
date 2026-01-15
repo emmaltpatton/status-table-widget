@@ -3,8 +3,8 @@
 (function () {
   // --------- Utilities ----------
   const el = (sel, ctx = document) => ctx.querySelector(sel);
-  const elAll = (sel, ctx = document) => Array.from(ctx.querySelectorAll(sel));
   const todayISO = () => new Date().toISOString().slice(0, 10);
+
   const csvToRows = (text) => {
     const rows = []; let row = []; let i = 0; let inQ = false; let cell = '';
     while (i < text.length) {
@@ -55,7 +55,7 @@
   function toISO(str, fmt) {
     if (!str) return '';
     const v = String(str).trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v; // already ISO
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v; // ISO
     if (fmt === 'DD/MM/YYYY') {
       const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
       if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
@@ -143,7 +143,7 @@
     el('#th-col3').textContent = SETTINGS.ThirdColumnLabel || 'Date';
     document.documentElement.style.setProperty('--brand', SETTINGS.ThemeColor || '#0f3b5f');
 
-    const tb = el('#tbody'); tb.innerHTML = '';
+    const tb = document.querySelector('#tbody'); tb.innerHTML = '';
     ROWS.forEach((r) => {
       const tr = document.createElement('tr');
 
@@ -234,12 +234,7 @@
       ExternalCSS: name('ExternalCSS')
     };
 
-    // Status colors mapping
-    COLORS = (function parseKV(input) {
-      const map = {}; String(input || '').split(';').forEach(pair => {
-        const idx = pair.indexOf(':'); if (idx > 0) map[pair.slice(0, idx).trim()] = pair.slice(idx + 1).trim();
-      }); return map;
-    })(SETTINGS.KV_StatusColor);
+    COLORS = parseKV(SETTINGS.KV_StatusColor);
 
     if (SETTINGS.ExternalCSS) {
       const link = document.createElement('link');
@@ -255,8 +250,8 @@
           const text = await res.text();
           const arr = csvToRows(text);
           SETTINGS.__csvRows = arr
-            .filter((r, i) => i === 0 || r && r.length)       // keep header + rows
-            .slice(1)                                         // skip header
+            .filter((r, i) => i === 0 || r && r.length)
+            .slice(1) // skip header
             .map(r => [r[0] || '']);
         } catch { SETTINGS.__csvRows = []; }
       }
