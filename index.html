@@ -5,8 +5,11 @@
   <meta charset="utf-8" />
   <title>Status Table Widget</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <!-- Jotform Custom Widget runtime -->
   <script src="//js.jotform.com/JotFormCustomWidget.min.js"></script>
+
+  <!-- Widget styles -->
   <link rel="stylesheet" href="./widget.css" />
 </head>
 <body>
@@ -31,11 +34,12 @@
 
     <footer class="p-footer">
       <div id="helper" class="p-helper">
-        Changes are saved to the form draft automatically when you use “Save & Continue later”.
+        Changes are saved to the form draft automatically when you use “Save &amp; Continue later”.
       </div>
     </footer>
   </div>
 
-  <script src="./widget.js"></script>
+  <!-- Widget logic -->
+  <script src="./widget.js" defer></script>
 </body>
 </html>
