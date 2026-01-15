@@ -1,16 +1,17 @@
 
-/* L&D Table – Question, Single Choice, Date
- * Updated widget.js
- * - Supports CSV upload via `csvFile` (Jotform file setting)
- * - Priority: csvFile -> ?csvUrl -> csvUrl -> csvText -> fallback questions
- * - Robust normalization for `questions` (newline or JSON array)  <-- PATCH INCLUDED
- * - Works in Jotform (iframe) and standalone; safe bootstrap
+/* Learning & Development Table – widget.js (Enterprise, 2026-01-15)
+ * - Jotform-ready + Standalone
+ * - CSV Upload via `csvFile` (file setting), or csvUrl / ?csvUrl / inline csvText
+ * - Column mapping: header names or numeric indices
+ * - Fallback questions: supports newline, <br>, JSON array
+ * - Snapshot + rehydrate across reloads
+ * - Height auto-resize in Jotform
  */
 
 (function () {
   "use strict";
 
-  /************  Mode detection & helpers  ************/
+  /************  Env detection & helpers  ************/
   const isInIframe = window.self !== window.top;
   const insideJotform = isInIframe && typeof window.JFCustomWidget !== "undefined";
 
@@ -30,9 +31,8 @@
     }
   }
 
-  // Interpret common truthy strings to boolean
-  function toBool(v, defaultVal = false) {
-    if (v === undefined || v === null) return defaultVal;
+  function toBool(v, def = false) {
+    if (v === undefined || v === null) return def;
     if (typeof v === "boolean") return v;
     const s = String(v).trim().toLowerCase();
     return ["1", "true", "on", "yes"].includes(s);
@@ -60,6 +60,10 @@
     } catch { /* no-op */ }
   }
 
+  // CSS.escape fallback for older engines
+  const CSS_ESCAPE = (window.CSS && CSS.escape) ? window.CSS.escape : (s) =>
+    String(s).replace(/"/g, '\\"');
+
   /************  DOM cache  ************/
   const dom = {
     tbody: null,
@@ -74,23 +78,21 @@
 
   /************  Defaults  ************/
   const DEFAULTS = {
-    // Labels / headers
+    // Labels
     tableTitle: "Learning & Development Evaluation",
     colQuestionHeader: "Question",
     colChoiceHeader: "Response",
     colDateHeader: "Date",
 
-    // Global choices when per-row not supplied
-    choices: ["Yes", "No", "N/A"],
-
     // Behaviour
+    choices: ["Yes", "No", "N/A"],
     enforceRequired: false,
     restrictMaxToday: true,
     updateDateOnChange: false,
     showReloadButton: true,
 
-    // CSV sources
-    csvFile: "",              // NEW: uploaded CSV URL (from Jotform widget setting)
+    // CSV (all sources)
+    csvFile: "",           // Jotform file upload → URL (may be object/array; coerced below)
     csvUrl: "",
     csvText: "",
     csvHasHeader: true,
@@ -100,7 +102,7 @@
     csvCodeColumn: "Code",
     csvCacheBuster: true,
 
-    // Fallback questions (used when CSV missing/unavailable)
+    // Fallback questions
     questions: [
       "Access Employee Portal within PageUp",
       "Complete Workplace Behaviour training",
@@ -108,10 +110,6 @@
     ],
   };
 
-  // Canonical data used for rendering: array of { q (HTML), choices?, code? }
-  let ROWS = [];
-
-  /************  Settings loader  ************/
   const PARAMS = [
     "tableTitle",
     "colQuestionHeader", "colChoiceHeader", "colDateHeader",
@@ -122,6 +120,9 @@
     "questions"
   ];
 
+  let ROWS = [];
+
+  /************  Load settings (Jotform + query overrides)  ************/
   function readSettings() {
     const cfg = { ...DEFAULTS };
 
@@ -131,14 +132,12 @@
           const v = JFCustomWidget.getWidgetSetting(n);
           if (v !== undefined && v !== null && v !== "") return v;
         }
-      } catch { /* ignore */ }
-      // Standalone override via query string (useful for testing)
+      } catch {}
       const q = getQueryParam(n);
       if (q !== null) return q;
       return def;
     };
 
-    // Pull all params with basic typing
     PARAMS.forEach((key) => {
       const base = DEFAULTS[key];
       const val = gs(key, base);
@@ -146,16 +145,22 @@
       if (typeof base === "boolean") {
         cfg[key] = toBool(val, base);
       } else if (Array.isArray(base)) {
-        // Accept comma-separated or JSON array for arrays like `choices`
+        // Arrays like `choices`: accept JSON array or comma-separated text
         if (Array.isArray(val)) {
           cfg[key] = val;
         } else if (typeof val === "string") {
           const s = val.trim();
           if (s.startsWith("[") && s.endsWith("]")) {
             try { cfg[key] = JSON.parse(s); }
-            catch { cfg[key] = s.split(/, */).map(x => x.replace(/^"+|"+$/g, "").trim()).filter(Boolean); }
+            catch {
+              cfg[key] = s.split(/, */)
+                .map(x => x.replace(/^"+|"+$/g, "").trim())
+                .filter(Boolean);
+            }
           } else {
-            cfg[key] = s.split(/, */).map(x => x.replace(/^"+|"+$/g, "").trim()).filter(Boolean);
+            cfg[key] = s.split(/, */)
+              .map(x => x.replace(/^"+|"+$/g, "").trim())
+              .filter(Boolean);
           }
         } else {
           cfg[key] = base;
@@ -165,41 +170,51 @@
       }
     });
 
-    // DEBUG flag from query
+    // Debug via ?debug=true
     window.__LD_DEBUG__ = toBool(getQueryParam("debug"), false);
 
-    // --- PATCH: Robust normalization for `questions` ---
-    // Accept current value as array, JSON array string, or newline-separated text
+    // Coerce csvFile → URL string (handles object/array shapes from Jotform)
+    (function coerceCsvFile() {
+      const v = cfg.csvFile;
+      if (!v) return;
+      if (typeof v === "object") {
+        if (Array.isArray(v) && v.length) {
+          cfg.csvFile = v[0]?.url || v[0]?.value || v[0] || "";
+        } else {
+          cfg.csvFile = v.url || v.value || "";
+        }
+      }
+      cfg.csvFile = String(cfg.csvFile || "").trim();
+    })();
+
+    // Normalize `questions` (array, JSON array string, newline text, or HTML with <br>)
     (function normalizeQuestions() {
       const rawQ = cfg.questions;
 
       if (Array.isArray(rawQ)) {
-        cfg.questions = rawQ.map(s => String(s)).map(s => s.trim()).filter(Boolean);
+        cfg.questions = rawQ.map(String).map(s => s.trim()).filter(Boolean);
         return;
       }
 
       if (typeof rawQ === "string") {
-        const s = rawQ.trim();
+        let s = rawQ.trim()
+          .replace(/<br\s*\/?>/gi, "\n")
+          .replace(/&#13;|&#10;|\r\n|\r/g, "\n");
 
-        // JSON array?
         if (s.startsWith("[") && s.endsWith("]")) {
           try {
             const arr = JSON.parse(s);
             cfg.questions = Array.isArray(arr)
-              ? arr.map(x => String(x)).map(x => x.trim()).filter(Boolean)
+              ? arr.map(String).map(x => x.trim()).filter(Boolean)
               : [];
             return;
           } catch { /* fall through to newline split */ }
         }
 
-        // Newline-separated
-        cfg.questions = s.split(/\r?\n/)
-          .map(t => t.trim())
-          .filter(Boolean);
+        cfg.questions = s.split("\n").map(t => t.trim()).filter(Boolean);
         return;
       }
 
-      // Fallback
       cfg.questions = (DEFAULTS.questions || []).slice();
     })();
 
@@ -222,12 +237,11 @@
 
   function resolveColumn(hasHeader, fields, columnSpecifier) {
     if (!hasHeader) {
-      // No header: use numeric index; default to first if unspecified
       if (typeof columnSpecifier === "number") return columnSpecifier;
       if (/^\d+$/.test(String(columnSpecifier || ""))) return parseInt(columnSpecifier, 10);
-      return 0;
+      return 0; // default first column
     }
-    // has header: allow header name or numeric index
+    // with header: allow header name or numeric index
     if (typeof columnSpecifier === "string" && !/^\d+$/.test(columnSpecifier)) {
       const idx = (fields || []).indexOf(columnSpecifier);
       return idx >= 0 ? idx : 0;
@@ -258,14 +272,16 @@
         const codeIdx = codeCol != null ? resolveColumn(true, fields, codeCol) : null;
 
         parsed.data.forEach((obj) => {
-          // Convert object w/ header keys to array aligned to `fields`
           const rowArr = fields.map(f => obj[f]);
           const q = String(rowArr[qIdx] ?? "").trim();
           if (!q) return;
-          const r = { q }; // HTML allowed
+
+          const r = { q };
           if (cIdx != null) {
             const rawChoices = String(rowArr[cIdx] ?? "").trim();
-            if (rawChoices) r.choices = rawChoices.split(delim).map(s => s.trim()).filter(Boolean);
+            if (rawChoices) {
+              r.choices = rawChoices.split(delim).map(s => s.trim()).filter(Boolean);
+            }
           }
           if (codeIdx != null) {
             const code = String(rowArr[codeIdx] ?? "").trim();
@@ -282,10 +298,13 @@
           if (!Array.isArray(arr)) return;
           const q = String(arr[qIdx] ?? "").trim();
           if (!q) return;
+
           const r = { q };
           if (cIdx != null) {
             const rawChoices = String(arr[cIdx] ?? "").trim();
-            if (rawChoices) r.choices = rawChoices.split(delim).map(s => s.trim()).filter(Boolean);
+            if (rawChoices) {
+              r.choices = rawChoices.split(delim).map(s => s.trim()).filter(Boolean);
+            }
           }
           if (codeIdx != null) {
             const code = String(arr[codeIdx] ?? "").trim();
@@ -314,6 +333,7 @@
       const cells = lines[i].split(",").map(s => s.trim());
       const q = String(cells[qIdx] ?? "").trim();
       if (!q) continue;
+
       const r = { q };
       if (cIdx != null) {
         const rawChoices = String(cells[cIdx] ?? "").trim();
@@ -329,7 +349,7 @@
   }
 
   async function getRowsFromConfig(cfg) {
-    // Priority: uploaded CSV (csvFile) -> ?csvUrl -> csvUrl -> csvText -> fallback questions
+    // Priority: uploaded CSV → ?csvUrl override → csvUrl → csvText → fallback
     const qsCsv = getQueryParam("csvUrl");
     const effectiveCsvUrl = cfg.csvFile || qsCsv || cfg.csvUrl;
 
@@ -350,11 +370,11 @@
       }
     }
 
-    // Use fallback questions (as HTML strings allowed)
+    // Fallback: questions array
     return (cfg.questions || []).map(q => ({ q }));
   }
 
-  /************  Rendering & value handling  ************/
+  /************  UI  ************/
   function setStatus(msg) {
     if (dom.status) dom.status.textContent = msg || "";
   }
@@ -379,16 +399,16 @@
     rows.forEach((row, rowIndex) => {
       const tr = document.createElement("tr");
 
-      // Column 1: read-only (HTML allowed)
+      // Column 1: Question (HTML allowed)
       const tdQ = document.createElement("td");
       const p = document.createElement("p");
       p.className = "q";
-      p.innerHTML = row.q; // HTML rendering enabled
+      p.innerHTML = row.q;
       p.setAttribute("aria-readonly", "true");
       tdQ.appendChild(p);
       tr.appendChild(tdQ);
 
-      // Column 2: single-choice radios
+      // Column 2: Radios
       const tdChoice = document.createElement("td");
       tdChoice.className = "choice-cell";
       const groupName = `row-${rowIndex}-choice`;
@@ -396,9 +416,12 @@
       const group = document.createElement("div");
       group.className = "radio-group";
       group.setAttribute("role", "radiogroup");
-      group.setAttribute("aria-label", `${cfg.colChoiceHeader} for "${stripHtml(row.q)}"`);
+      group.setAttribute("aria-label", `${stripHtml(row.q)} response`);
 
-      const options = Array.isArray(row.choices) && row.choices.length ? row.choices : cfg.choices;
+      const options = Array.isArray(row.choices) && row.choices.length
+        ? row.choices
+        : cfg.choices;
+
       options.forEach((label, idx) => {
         const id = `${groupName}-${idx}`;
         const wrap = document.createElement("div");
@@ -422,7 +445,7 @@
       tdChoice.appendChild(group);
       tr.appendChild(tdChoice);
 
-      // Column 3: date input
+      // Column 3: Date
       const tdDate = document.createElement("td");
       const date = document.createElement("input");
       date.type = "date";
@@ -432,7 +455,7 @@
       tdDate.appendChild(date);
       tr.appendChild(tdDate);
 
-      // Default/refresh date on radio change
+      // Auto-set date on change
       group.addEventListener("change", () => {
         const shouldSet = cfg.updateDateOnChange || !date.value;
         if (shouldSet) {
@@ -459,7 +482,6 @@
       const choice = tr.querySelector('input[type="radio"]:checked')?.value ?? "";
       const date = tr.querySelector('input[type="date"]')?.value ?? "";
 
-      // Attempt to map back to original row for code
       const meta = rows.find(r => stripHtml(r.q) === qText);
       const code = meta?.code;
 
@@ -472,17 +494,16 @@
 
   function validateAllAnswered(cfg) {
     if (!cfg.enforceRequired) return { valid: true, message: "" };
-    const missing = Array.from(dom.tbody.querySelectorAll("tr")).some(tr =>
-      !tr.querySelector('input[type="radio"]:checked'));
+    const missing = Array.from(dom.tbody.querySelectorAll("tr"))
+      .some(tr => !tr.querySelector('input[type="radio"]:checked'));
     if (missing) {
       return { valid: false, message: "Please answer all rows before submitting." };
     }
     return { valid: true, message: "" };
   }
 
-  /************  Fetch & render flow  ************/
+  /************  Fetch & render  ************/
   async function fetchAndRender(cfg, { preserve = true } = {}) {
-    // Snapshot previously selected values (by question text) to re-apply after reload
     const snapshot = preserve ? collectData(ROWS) : [];
     setStatus("Loading…");
     if (dom.reloadBtn) dom.reloadBtn.disabled = true;
@@ -494,15 +515,14 @@
       applyHeaders(cfg);
       renderTable(ROWS, cfg);
 
-      // Rehydrate previous selections by matching text
+      // Rehydrate by matching by question text
       if (snapshot.length) {
         snapshot.forEach(s => {
           const tr = Array.from(dom.tbody.querySelectorAll("tr"))
             .find(tr0 => stripHtml(tr0.querySelector(".q")?.innerHTML || "") === s.question);
           if (!tr) return;
           if (s.choice) {
-            const valueSel = `input[type="radio"][value="${CSS.escape(s.choice)}"]`;
-            const input = tr.querySelector(valueSel);
+            const input = tr.querySelector(`input[type="radio"][value="${CSS_ESCAPE(s.choice)}"]`);
             if (input) input.checked = true;
           }
           if (s.date) {
@@ -538,11 +558,11 @@
     dom.reloadBtn = document.getElementById("reloadBtn");
     dom.status = document.getElementById("status");
 
-    // Load config & headers
+    // Settings + headers
     const cfg = readSettings();
     applyHeaders(cfg);
 
-    // Bind reload
+    // Reload
     if (dom.reloadBtn) {
       dom.reloadBtn.addEventListener("click", () => {
         fetchAndRender(cfg, { preserve: true }).catch(e => log("Reload error", e));
@@ -552,7 +572,7 @@
     // First render
     await fetchAndRender(cfg, { preserve: false });
 
-    // Hydrate saved value if available (Jotform mode)
+    // Rehydrate saved Jotform value (if exists)
     try {
       if (insideJotform && typeof JFCustomWidget.getValue === "function") {
         const existing = JFCustomWidget.getValue();
@@ -565,7 +585,7 @@
                 .find(tr0 => stripHtml(tr0.querySelector(".q")?.innerHTML || "") === s.question);
               if (!tr) return;
               if (s.choice) {
-                const input = tr.querySelector(`input[type="radio"][value="${CSS.escape(s.choice)}"]`);
+                const input = tr.querySelector(`input[type="radio"][value="${CSS_ESCAPE(s.choice)}"]`);
                 if (input) input.checked = true;
               }
               if (s.date) {
@@ -580,7 +600,7 @@
 
     setHeight();
 
-    // SUBMIT handling
+    // Submit
     if (insideJotform) {
       JFCustomWidget.subscribe("submit", function () {
         const check = validateAllAnswered(cfg);
@@ -594,7 +614,7 @@
         JFCustomWidget.sendSubmit({ valid: true, value: JSON.stringify(value) });
       });
     } else {
-      // Standalone test convenience
+      // Standalone dev helper
       if (!document.getElementById("ld-log-btn")) {
         const btn = document.createElement("button");
         btn.id = "ld-log-btn";
@@ -612,7 +632,7 @@
     }
   }
 
-  // ---- Entry (robust bootstrap with fallback) ----
+  /************  Bootstrap (Jotform + fallback)  ************/
   try {
     let started = false;
     const start = () => {
@@ -622,16 +642,13 @@
     };
 
     if (insideJotform && typeof JFCustomWidget?.subscribe === "function") {
-      // Jotform path
       JFCustomWidget.subscribe("ready", () => {
         log("JFCustomWidget ready");
         start();
       });
-
-      // Fallback: if not actually inside a Jotform iframe, still start
+      // In case not truly inside JF iframe, still start
       setTimeout(() => { if (!started) start(); }, 800);
     } else {
-      // Standalone path
       document.addEventListener("DOMContentLoaded", () => {
         log("Standalone mode");
         start();
@@ -639,7 +656,8 @@
     }
   } catch (e) {
     log("bootstrap error", e);
-    document.addEventListener("DOMContentLoaded", () => init().catch(err => log("init error", err)));
+    document.addEventListener("DOMContentLoaded", () =>
+      init().catch(err => log("init error", err))
+    );
   }
 })();
-``
