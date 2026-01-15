@@ -5,16 +5,15 @@
   <title>L&D Table (Question • Single Choice • Date)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Jotform Custom Widget API (safe outside Jotform: it will simply 404 silently) -->
+  <!-- Jotform Custom Widget API (safe outside Jotform; if missing, our JS falls back) -->
   <script src="https://js.jotform.com/JotFormCustomWidget.min.js"></script>
 
   <!-- Papa Parse for CSV -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <!-- Your stylesheet -->
+  <!-- Styles -->
   <link rel="stylesheet" href="./styles.css" />
 </head>
-
 <body>
   <main class="container">
     <header class="header">
@@ -39,7 +38,7 @@
     <p id="error" class="error" hidden></p>
   </main>
 
-  <!-- Your widget logic -->
+  <!-- Widget logic -->
   <script src="./widget.js"></script>
 </body>
 </html>
