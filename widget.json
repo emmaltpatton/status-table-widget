@@ -1,165 +1,165 @@
 
 {
   "name": "Learning & Development Table",
-  "description": "A dynamic, CSV-powered L&D evaluation widget with read-only questions, single-choice responses, auto-dated completion, fallback questions, and per-row codes.",
+  "description": "Enterprise L&D evaluation widget supporting CSV-driven content, per-row responses, and structured record capture.",
   "url": "https://emmaltpatton.github.io/ld-table-widget/index.html",
   "iconUrl": "https://emmaltpatton.github.io/ld-table-widget/icon-128.png",
   "platform": "iframe",
   "width": 900,
   "height": 420,
-  "version": "2.0.0",
+  "version": "3.0.0",
 
   "settings": [
 
-    /* --------------------------
-       CSV SOURCE
-    --------------------------- */
+    /* ===============================
+       DATA SOURCE
+       =============================== */
     {
       "type": "header",
-      "label": "CSV Source"
+      "label": "Data Source"
     },
     {
       "name": "csvFile",
-      "label": "Upload CSV File",
+      "label": "Upload CSV",
       "type": "file",
       "fileType": "csv"
     },
     {
       "name": "csvUrl",
-      "label": "CSV URL (optional)",
+      "label": "CSV URL",
       "type": "text",
-      "placeholder": "https://example.com/questions.csv"
+      "placeholder": "https://example.com/data.csv"
     },
     {
       "name": "csvText",
-      "label": "Inline CSV (optional)",
+      "label": "Inline CSV",
       "type": "textarea",
-      "placeholder": "Question,Choices,Code\nQ1,\"Yes|No\",A1"
+      "placeholder": "Question,Choices,Code\nExample,\"Yes|No\",A1"
     },
     {
       "name": "csvHasHeader",
-      "label": "CSV includes a header row",
+      "label": "Has Header Row",
       "type": "checkbox",
       "defaultValue": true
     },
 
-    /* --------------------------
-       COLUMN MAPPING
-    --------------------------- */
+    /* ===============================
+       COLUMN CONFIGURATION
+       =============================== */
     {
       "type": "header",
-      "label": "Column Mapping"
+      "label": "Column Configuration"
     },
     {
       "name": "csvQuestionColumn",
-      "label": "Question column (header name or index)",
+      "label": "Question Column",
       "type": "text",
       "defaultValue": "Question"
     },
     {
       "name": "csvChoicesColumn",
-      "label": "Choices column (header name or index)",
+      "label": "Choices Column",
       "type": "text",
       "defaultValue": "Choices"
     },
     {
       "name": "csvChoicesDelimiter",
-      "label": "Choices delimiter",
+      "label": "Delimiter",
       "type": "dropdown",
       "options": ["|", ",", ";", "/", ":"],
       "defaultValue": "|"
     },
     {
       "name": "csvCodeColumn",
-      "label": "Code column (optional)",
+      "label": "Code Column",
       "type": "text",
       "defaultValue": "Code"
     },
     {
       "name": "csvCacheBuster",
-      "label": "Bypass cache when loading CSV",
+      "label": "Bypass Cache",
       "type": "checkbox",
       "defaultValue": true
     },
 
-    /* --------------------------
-       TABLE APPEARANCE
-    --------------------------- */
+    /* ===============================
+       TABLE SETTINGS
+       =============================== */
     {
       "type": "header",
-      "label": "Table Appearance"
+      "label": "Table Settings"
     },
     {
       "name": "tableTitle",
-      "label": "Table title",
+      "label": "Title",
       "type": "text",
       "defaultValue": "Learning & Development Evaluation"
     },
     {
       "name": "colQuestionHeader",
-      "label": "Question column label",
+      "label": "Question Header",
       "type": "text",
       "defaultValue": "Question"
     },
     {
       "name": "colChoiceHeader",
-      "label": "Response column label",
+      "label": "Response Header",
       "type": "text",
       "defaultValue": "Response"
     },
     {
       "name": "colDateHeader",
-      "label": "Date column label",
+      "label": "Date Header",
       "type": "text",
       "defaultValue": "Date"
     },
 
-    /* --------------------------
-       BEHAVIOR
-    --------------------------- */
+    /* ===============================
+       BEHAVIOUR
+       =============================== */
     {
       "type": "header",
-      "label": "Behavior"
+      "label": "Behaviour"
     },
     {
       "name": "choices",
-      "label": "Global fallback choices",
+      "label": "Default Choices",
       "type": "text",
       "defaultValue": "Yes, No, N/A"
     },
     {
       "name": "enforceRequired",
-      "label": "Require a response for every row",
+      "label": "Require All Responses",
       "type": "checkbox"
     },
     {
       "name": "restrictMaxToday",
-      "label": "Prevent future dates",
+      "label": "Prevent Future Dates",
       "type": "checkbox",
       "defaultValue": true
     },
     {
       "name": "updateDateOnChange",
-      "label": "Auto-set date when response changes",
+      "label": "Auto-set Date On Change",
       "type": "checkbox"
     },
     {
       "name": "showReloadButton",
-      "label": "Show Reload button",
+      "label": "Show Reload Button",
       "type": "checkbox",
       "defaultValue": true
     },
 
-    /* --------------------------
+    /* ===============================
        FALLBACK QUESTIONS
-    --------------------------- */
+       =============================== */
     {
       "type": "header",
       "label": "Fallback Questions"
     },
     {
       "name": "questions",
-      "label": "Questions (newline or JSON array)",
+      "label": "Questions",
       "type": "textarea",
       "defaultValue": "Access Employee Portal within PageUp\nComplete Workplace Behaviour training\nReview HSE Essentials procedures"
     }
