@@ -1,43 +1,61 @@
 
 {
   "name": "L&D Table – Question, Single Choice, Date",
-  "description": "Table with read-only (HTML-capable) questions, single-choice responses, and a date that defaults to the day a response is selected. Supports CSV-prefill, per-row choices, optional row codes, and a Reload button.",
+  "description": "Table with read-only questions, single-choice responses, and auto-dated completion. Supports CSV upload, per-row choices, codes, and reload.",
   "url": "https://emmaltpatton.github.io/ld-table-widget/index.html",
   "iconUrl": "https://emmaltpatton.github.io/ld-table-widget/icon-128.png",
   "platform": "iframe",
   "width": 900,
   "height": 380,
-  "version": "1.2.0",
-  "author": "Staffing Development (L&D)",
-  "email": "ld-team@example.com",
-  "keywords": ["training", "evaluation", "L&D", "compliance", "review", "table", "CSV"],
+  "version": "1.3.0",
 
   "settings": [
-    { "name": "tableTitle",        "label": "Table title",                   "type": "text",     "defaultValue": "Learning & Development Evaluation" },
-    { "name": "colQuestionHeader", "label": "Question column name",          "type": "text",     "defaultValue": "Question" },
-    { "name": "colChoiceHeader",   "label": "Response column name",          "type": "text",     "defaultValue": "Response" },
-    { "name": "colDateHeader",     "label": "Date column name",              "type": "text",     "defaultValue": "Date" },
-
-    { "name": "choices",           "label": "Global choices (comma-separated or JSON array)", "type": "text", "defaultValue": "Yes, No, N/A" },
-    { "name": "enforceRequired",   "label": "Require a response on every row", "type": "checkbox", "defaultValue": false },
-    { "name": "restrictMaxToday",  "label": "Prevent future dates",            "type": "checkbox", "defaultValue": true },
-    { "name": "updateDateOnChange","label": "Always reset date when response changes", "type": "checkbox", "defaultValue": false },
-    { "name": "showReloadButton",  "label": "Show Reload button",              "type": "checkbox", "defaultValue": true },
-
-    { "name": "csvUrl",            "label": "CSV URL (public)",               "type": "text",     "placeholder": "https://raw.githubusercontent.com/your-org/ld-questions/main/questions.csv" },
-    { "name": "csvText",           "label": "CSV (inline, optional)",         "type": "textarea", "placeholder": "Question,Choices,Code\nComplete Workplace Behaviour,\"Yes|No|N/A\",WB-01" },
-    { "name": "csvHasHeader",      "label": "CSV has header row",             "type": "checkbox", "defaultValue": true },
-    { "name": "csvQuestionColumn", "label": "Question column (header or index)", "type": "text",  "defaultValue": "Question" },
-    { "name": "csvChoicesColumn",  "label": "Choices column (header or index, optional)", "type": "text", "defaultValue": "Choices" },
-    { "name": "csvChoicesDelimiter","label": "Choices delimiter",               "type": "text",     "defaultValue": "|" },
-    { "name": "csvCodeColumn",     "label": "Code column (header or index, optional)", "type": "text", "defaultValue": "Code" },
-    { "name": "csvCacheBuster",    "label": "Bypass cache when loading CSV",  "type": "checkbox", "defaultValue": true },
+    {
+      "name": "csvFile",
+      "label": "Upload CSV File",
+      "type": "file",
+      "fileType": "text/csv"
+    },
+    {
+      "name": "csvUrl",
+      "label": "CSV URL (optional)",
+      "type": "text",
+      "placeholder": "https://..."
+    },
+    {
+      "name": "csvText",
+      "label": "CSV (inline as text)",
+      "type": "textarea",
+      "placeholder": "Question,Choices,Code\nExample question,\"Yes|No\",A1"
+    },
+    {
+      "name": "csvHasHeader",
+      "label": "CSV has header row",
+      "type": "checkbox",
+      "defaultValue": true
+    },
 
     {
-      "name": "questions",
-      "label": "Fallback questions (newline or JSON array)",
-      "type": "textarea",
-      "defaultValue": "Access Employee Portal within PageUp\nComplete Workplace Behaviour training\nReview HSE Essentials procedures"
-    }
-  ]
-}
+      "name": "csvQuestionColumn",
+      "label": "Question Column (header or index)",
+      "type": "text",
+      "defaultValue": "Question"
+    },
+    {
+      "name": "csvChoicesColumn",
+      "label": "Choices Column (header or index, optional)",
+      "type": "text",
+      "defaultValue": "Choices"
+    },
+
+    {
+      "name": "csvChoicesDelimiter",
+      "label": "Choices delimiter",
+      "type": "text",
+      "defaultValue": "|"
+    },
+    {
+      "name": "csvCodeColumn",
+      "label": "Code column (optional)",
+      "type": "text",
+      "defaultValue": "Code"
