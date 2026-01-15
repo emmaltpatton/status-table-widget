@@ -1,44 +1,41 @@
+
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>L&D Table (Question • Single Choice • Date)</title>
+  <title>Status Table Widget</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- Jotform Custom Widget API (safe outside Jotform; if missing, our JS falls back) -->
-  <script src="https://js.jotform.com/JotFormCustomWidget.min.js"></script>
-
-  <!-- Papa Parse for CSV -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="./styles.css" />
+  <!-- Jotform Custom Widget runtime -->
+  <script src="//js.jotform.com/JotFormCustomWidget.min.js"></script>
+  <link rel="stylesheet" href="./widget.css" />
 </head>
 <body>
-  <main class="container">
-    <header class="header">
-      <h3 id="tableTitle">Learning & Development Evaluation</h3>
-      <div class="header-actions">
-        <button id="reloadBtn" type="button" class="btn" aria-live="polite">Reload</button>
-        <span id="status" class="status" aria-live="polite"></span>
-      </div>
+  <div id="app" class="p-wrapper">
+    <header class="p-header">
+      <h1 id="title">Status Table</h1>
+      <p class="p-sub">Rich HTML | Single-choice status | Auto/back-datable date</p>
     </header>
 
-    <table id="ldTable" class="ld-table" role="table" aria-label="Training responses">
-      <thead>
-        <tr>
-          <th id="qHeader">Question</th>
-          <th id="choiceHeader">Response</th>
-          <th id="dateHeader">Date</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
+    <div id="table-host" class="p-card">
+      <table id="grid" class="p-table">
+        <thead>
+          <tr>
+            <th id="th-col1">Item / Requirement</th>
+            <th id="th-col2">Status</th>
+            <th id="th-col3">Date</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
 
-    <p id="error" class="error" hidden></p>
-  </main>
+    <footer class="p-footer">
+      <div id="helper" class="p-helper">
+        Changes are saved to the form draft automatically when you use “Save & Continue later”.
+      </div>
+    </footer>
+  </div>
 
-  <!-- Widget logic -->
   <script src="./widget.js"></script>
 </body>
 </html>
