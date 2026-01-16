@@ -268,18 +268,21 @@ window.StatusTableWidget = {
     return;
   }
 
-  // 1) On load, fetch initial settings from Jotform
-  try {
-    JFCustomWidget.getWidgetSetting(function (settings) {
-      // Example: settings.RowHTML_Defaults contains the "Seed rows" value
-      window.StatusTableWidget.init(settings);
 
-      // Let Jotform know the widget is valid/ready
-      JFCustomWidget.sendData({ valid: true });
+// 1) On load, fetch initial settings from Jotform
+try {
+    JFCustomWidget.getWidgetSetting(function(settings) {
+
+        console.log("Settings received from Jotform:", settings);   // <-- ADD THIS
+
+        window.StatusTableWidget.init(settings);
+
+        JFCustomWidget.sendData({ valid: true });
     });
-  } catch (e) {
+} catch (e) {
     console.warn('JFCustomWidget.getWidgetSetting failed:', e);
-  }
+}
+
 
   // 2) When user clicks "Update Widget" or settings change in panel
   try {
@@ -310,3 +313,4 @@ window.StatusTableWidget = {
     console.warn('JFCustomWidget.subscribe("populate") failed:', e);
   }
 })();
+
