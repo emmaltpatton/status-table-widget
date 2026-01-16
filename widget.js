@@ -51,7 +51,6 @@
     return tmp.innerHTML;
   }
 
-  // Date helpers
   function toISO(str, fmt) {
     if (!str) return '';
     const v = String(str).trim();
@@ -76,9 +75,9 @@
 
   // --------- Model & State ----------
   let SETTINGS = {};
-  let ROWS = [];         // [{id, col1_html, status, date}]
-  let OPTIONS = [];      // single-choice options
-  let COLORS = {};       // status -> color
+  let ROWS = [];
+  let OPTIONS = [];
+  let COLORS = {};
 
   function parseKV(input) {
     const map = {};
@@ -152,46 +151,42 @@
       td1.innerHTML = r.col1_html;
       tr.appendChild(td1);
 
-   
-// Column 2: single-choice buttons (radio)
-const td2 = document.createElement('td');
-const radioGroup = document.createElement('div');
-radioGroup.className = 'p-radio-group';
+      // Column 2: radio buttons
+      const td2 = document.createElement('td');
+      const radioGroup = document.createElement('div');
+      radioGroup.className = 'p-radio-group';
 
-OPTIONS.forEach(opt => {
-  const label = document.createElement('label');
-  label.className = 'p-radio-label';
+      OPTIONS.forEach(opt => {
+        const label = document.createElement('label');
+        label.className = 'p-radio-label';
 
-  const radio = document.createElement('input');
-  radio.type = 'radio';
-  radio.name = `status-${r.id}`; // unique per row
-  radio.value = opt;
-  radio.className = 'p-radio';
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = `status-${r.id}`;
+        radio.value = opt;
+        radio.className = 'p-radio';
 
-  if (r.status === opt) radio.checked = true;
+        if (r.status === opt) radio.checked = true;
 
-  radio.addEventListener('change', () => {
-    r.status = opt;
-    if (r.status && COLORS[r.status]) {
-      label.style.color = COLORS[r.status];
-    }
-    // Auto-date when selected
-    r.date = todayISO();
-    dateInput.value = r.date;
-    pushDraft();
-  });
+        radio.addEventListener('change', () => {
+          r.status = opt;
+          if (r.status && COLORS[r.status]) {
+            label.style.color = COLORS[r.status];
+          }
+          r.date = todayISO();
+          dateInput.value = r.date;
+          pushDraft();
+        });
 
-  label.appendChild(radio);
-  label.appendChild(document.createTextNode(opt));
-  radioGroup.appendChild(label);
-});
+        label.appendChild(radio);
+        label.appendChild(document.createTextNode(opt));
+        radioGroup.appendChild(label);
+      });
 
-td2.appendChild(radioGroup);
-tr.appendChild(td2);
-``
+      td2.appendChild(radioGroup);
+      tr.appendChild(td2);
 
-
-      // Column 3: date (user may backdate)
+      // Column 3: date
       const td3 = document.createElement('td');
       const dateInput = document.createElement('input'); dateInput.type = 'date'; dateInput.className = 'p-date';
       dateInput.value = toISO(r.date, SETTINGS.DateFormat) || '';
@@ -247,17 +242,13 @@ tr.appendChild(td2);
       document.head.appendChild(link);
     }
 
-    // Load CSV if provided (Jotform passes a file URL)
     return (async () => {
       if (SETTINGS.CSVSource) {
         try {
           const res = await fetch(SETTINGS.CSVSource, { credentials: 'omit' });
           const text = await res.text();
           const arr = csvToRows(text);
-          SETTINGS.__csvRows = arr
-            .filter((r, i) => i === 0 || r && r.length)
-            .slice(1) // skip header
-            .map(r => [r[0] || '']);
+          SETTINGS.__csvRows = arr.slice(1).map(r => [r[0] || '']);
         } catch { SETTINGS.__csvRows = []; }
       }
     })();
@@ -278,9 +269,23 @@ tr.appendChild(td2);
     } catch { return false; }
   }
 
+  // --------- Preview Mode Defaults ----------
+  const urlParams = new URLSearchParams(window.location.search);
+  const devMode = urlParams.has('dev');
+
   JFCustomWidget.subscribe('ready', async function () {
     await initFromSettings();
     await buildOptions();
+
+    if (devMode) {
+      if (!SETTINGS.FirstColumnLabel) SETTINGS.FirstColumnLabel = "Item / Requirement";
+      if (!SETTINGS.SecondColumnLabel) SETTINGS.SecondColumnLabel = "Status";
+      if (!SETTINGS.ThirdColumnLabel) SETTINGS.ThirdColumnLabel = "Date";
+      if (!SETTINGS.RowHTML_Defaults) SETTINGS.RowHTML_Defaults =
+        "<b>Policy induction</b><br><i>Read and acknowledge</i>\nDevice setup & VPN\nCreate LMS account & enrol in core modules";
+      if (!SETTINGS.ChoiceOptions) SETTINGS.ChoiceOptions = "Not started\nIn progress\nCompleted";
+    }
+
     buildRowsFromSettings();
     render();
 
@@ -289,7 +294,6 @@ tr.appendChild(td2);
       JFCustomWidget.sendSubmit(payload);
     });
 
-    // If the runtime provides a draft/edit payload, restore it
     if (JFCustomWidget.subscribe) {
       JFCustomWidget.subscribe('populate', function (data) {
         if (restoreIfProvided(data && (data.value || data))) { render(); }
@@ -297,4 +301,3 @@ tr.appendChild(td2);
     }
   });
 })();
-
