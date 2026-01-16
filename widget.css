@@ -32,7 +32,25 @@ body { margin: 0; font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "H
 .p-col1 a:hover { text-decoration: underline; }
 .p-col1 ul, .p-col1 ol { margin: 6px 0 0 18px; }
 
-.p-select { width: 100%; min-width: 200px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; background: #fff; }
+
+.p-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.p-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.p-radio {
+  accent-color: var(--brand);
+}
+
 .p-date { width: 100%; max-width: 180px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
 
 .p-badge {
