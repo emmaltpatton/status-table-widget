@@ -1,59 +1,46 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
   <title>Status Table Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Your styles (cache-busted to avoid Jotform iframe caching) -->
-  <link rel="stylesheet" href="widget.css?v=20260116" />
+  <!-- Jotform Custom Widget runtime -->
+  https://js.jotform.com/JotFormCustomWidget.min.js</script>
 
-  <!-- 🟦 Jotform Custom Widget SDK: REQUIRED inside the widget iframe -->
-  <!-- Primary CDN -->
-  <script src="https://js.jotform.com/JotFormCustomWidget.js"></script>
-  <!-- Optional fallback (uncomment if your network blocks js.jotform.com) -->
-  <!-- <script src="https://cdn.jotfor.ms/js/vendor/JotFormCustomWidget.js"></script> -->
+  <!-- Widget styles -->
+  ./widget.css
 </head>
-
 <body>
-  <div class="status-table-wrapper">
-    <table class="status-table">
-      <!-- Prevent Column 1 from collapsing -->
-      <colgroup>
-        <col style="width:56%">
-        <col style="width:24%">
-        <col style="width:20%">
-      </colgroup>
+  <div id="app" class="p-wrapper">
+    <header class="p-header">
+      <!-- Dynamic title populated by widget.js -->
+      <h1 id="title"></h1>
+      <p class="p-sub">Rich HTML | Single-choice status | Auto/back-datable date</p>
+    </header>
 
-      <thead>
-        <tr>
-          <th>Task</th>
-          <th>Status</th>
-          <th>Date</th>
-        </tr>
-      </thead>
+    <div id="table-host" class="p-card">
+      <table id="grid" class="p-table">
+        <thead>
+          <tr>
+            <th id="th-col1">Item / Requirement</th>
+            <th id="th-col2">Status</th>
+            <th id="th-col3">Date</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
 
-      <tbody id="stw-body"></tbody>
-    </table>
+    <footer class="p-footer">
+      <div id="helper" class="p-helper">
+        Changes are saved to the form draft automatically when you use “Save &amp; Continue later”.
+      </div>
+    </footer>
   </div>
 
-  <!-- Your widget logic (cache-busted) -->
-  <script src="widget.js?v=20260116"></script>
-
-  <!-- Optional: Standalone demo seeding (has no effect inside Jotform) -->
-  <!--
-  <script>
-    // When viewing on GitHub pages (not Jotform), you can seed via a global:
-    window.TASKS = [
-      "Collect Employee’s Name in Pathways",
-      "Send Induction Email",
-      "Issue Logins",
-      "Complete Onboarding Checklist",
-      "Introduce Manager"
-    ];
-  </script>
-  -->
+  <!-- Widget logic -->
+  ./widget.js</script>
 </body>
 </html>
-``
