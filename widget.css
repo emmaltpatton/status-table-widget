@@ -1,64 +1,82 @@
 
 :root {
-  --brand: #0f3b5f;
-  --border: #d0d7de;
-  --text: #0a2540;
-  --muted: #6b7280;
-  --row-alt: #f8fafc;
-  --badge-bg: #eef2f7;
-  --badge-fg: #0a2540;
-  --focus: #0d6efd33;
+    --border: #d0d7de;
+    --text: #0a2540;
+    --muted: #6b7280;
+    --row-alt: #f8fafc;
+    --badge-bg: #eef2f7;
+    --badge-fg: #0a2540;
+    --focus: #0d6efd33;
+    --brand: #0c2340;
 }
 
-* { box-sizing: border-box; }
-body { margin: 0; font: 14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif; color: var(--text); background: #fff; }
-
-.p-wrapper { padding: 12px 14px 18px; }
-.p-header h1 { margin: 0; font-size: 16px; color: var(--brand); letter-spacing: .2px; }
-.p-sub { margin: 4px 0 12px; color: var(--muted); }
-
-.p-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
-
-.p-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-.p-table thead th {
-  text-align: left; padding: 10px 12px; background: #f4f6f8; color: #0a2540; border-bottom: 1px solid var(--border);
-  font-weight: 600; font-size: 13px;
-}
-.p-table tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
-.p-table tbody tr:nth-child(even) td { background: var(--row-alt); }
-
-.p-col1 { max-width: 560px; }
-.p-col1 a { color: #0d6efd; text-decoration: none; }
-.p-col1 a:hover { text-decoration: underline; }
-.p-col1 ul, .p-col1 ol { margin: 6px 0 0 18px; }
-
-
-.p-radio-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+body {
+    font-family: Inter, system-ui, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #f7f9fc;
+    color: var(--text);
 }
 
-.p-radio-label {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  cursor: pointer;
+.status-table-wrapper {
+    width: 100%;
+    overflow-x: visible; /* fix clipping when using sticky column */
 }
 
-.p-radio {
-  accent-color: var(--brand);
+.status-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #fff;
 }
 
-.p-date { width: 100%; max-width: 180px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; }
-
-.p-badge {
-  display: inline-block; padding: 2px 8px; border-radius: 999px;
-  background: var(--badge-bg); color: var(--badge-fg); font-size: 12px; margin-left: 6px;
+.status-table th,
+.status-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px;
+    vertical-align: top;
+    font-size: 14px;
 }
 
-.p-footer { margin-top: 8px; }
-.p-helper { color: var(--muted); font-size: 12px; }
+.status-table th {
+    background: #f0f4f8;
+    font-weight: 600;
+}
 
-.p-table :focus { outline: 3px solid var(--focus); outline-offset: 1px; }
+.status-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+/* Keep column 1 always visible */
+.status-table td:first-child,
+.status-table th:first-child {
+    color: var(--text);
+    white-space: normal;
+    opacity: 1;
+}
+
+/* Prevent column 1 collapsing at any time */
+.status-table td.p-col1 {
+    min-width: 200px;
+}
+
+/* Radio group styling */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Date input styling */
+.date-input {
+    width: 130px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
