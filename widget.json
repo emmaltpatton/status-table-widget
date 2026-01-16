@@ -1,7 +1,7 @@
 
 {
   "name": "Status Table (Rich HTML + Single Choice + Date)",
-  "description": "Three-column status tracker with rich HTML in the first column, a consistent single-choice field per row, and an auto-updating/back-datable date column.",
+  "description": "Three-column status tracker with rich HTML in the first column, single-choice buttons in the second column, and an auto-updating/back-datable date column.",
   "icon": "https://emmaltpatton.github.io/status-table-widget/icon-status-table.png",
   "type": "iframe",
   "url": "https://emmaltpatton.github.io/status-table-widget/index.html",
@@ -23,22 +23,86 @@
     "KV_StatusColor": "Not started:#6c757d;In progress:#0d6efd;Completed:#198754"
   },
   "properties": [
-    { "name": "FirstColumnLabel",  "label": "First column label",   "type": "Text" },
-    { "name": "SecondColumnLabel", "label": "Second column label",  "type": "Text" },
-    { "name": "ThirdColumnLabel",  "label": "Third column label",   "type": "Text" },
-
-    { "name": "ChoiceOptions",     "label": "Single-choice options (one per line)", "type": "Textarea" },
-    { "name": "DateFormat",        "label": "Date format", "type": "Dropdown",
-      "options": ["YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY"] },
-    { "name": "AllowBackdate",     "label": "Allow backdating of dates", "type": "Toggle" },
-
-    { "name": "RowHTML_Defaults",  "label": "Seed rows (Column 1 HTML, one row per line)", "type": "Textarea" },
-    { "name": "CSVSource",         "label": "Upload CSV (overrides Seed rows)", "type": "File Upload" },
-
-    { "name": "RemoteOptionsURL",  "label": "Remote options URL (JSON array of strings)", "type": "External" },
-    { "name": "APIAuthToken",      "label": "API Auth Token (Bearer ...)", "type": "Secure Text" },
-    { "name": "KV_StatusColor",    "label": "Key/Value: status->color (e.g. A:#hex;B:#hex)", "type": "Key Value Pair" },
-    { "name": "ThemeColor",        "label": "Brand color", "type": "Color" },
-    { "name": "ExternalCSS",       "label": "Custom CSS URL", "type": "External" }
+    {
+      "name": "FirstColumnLabel",
+      "label": "First column label",
+      "type": "Text",
+      "placeholder": "Item / Requirement"
+    },
+    {
+      "name": "SecondColumnLabel",
+      "label": "Second column label",
+      "type": "Text",
+      "placeholder": "Status"
+    },
+    {
+      "name": "ThirdColumnLabel",
+      "label": "Third column label",
+      "type": "Text",
+      "placeholder": "Date"
+    },
+    {
+      "name": "ChoiceOptions",
+      "label": "Single-choice options (one per line)",
+      "type": "Textarea",
+      "placeholder": "Not started\nIn progress\nCompleted",
+      "description": "Each line becomes a radio button option for Column 2"
+    },
+    {
+      "name": "DateFormat",
+      "label": "Date format",
+      "type": "Dropdown",
+      "options": ["YYYY-MM-DD", "DD/MM/YYYY", "MM/DD/YYYY"],
+      "default": "YYYY-MM-DD"
+    },
+    {
+      "name": "AllowBackdate",
+      "label": "Allow backdating of dates",
+      "type": "Toggle",
+      "default": true
+    },
+    {
+      "name": "RowHTML_Defaults",
+      "label": "Seed rows (Column 1 HTML, one per line)",
+      "type": "Textarea",
+      "placeholder": "<b>Policy induction</b><br><i>Read and acknowledge</i>",
+      "description": "Supports HTML tags: <a>, <b>, <i>, <ul>, <li>, <br>"
+    },
+    {
+      "name": "CSVSource",
+      "label": "Upload CSV (overrides Seed rows)",
+      "type": "File Upload",
+      "description": "CSV first column = HTML for Column 1"
+    },
+    {
+      "name": "RemoteOptionsURL",
+      "label": "Remote options URL (JSON array of strings)",
+      "type": "External",
+      "placeholder": "https://example.com/status-options.json"
+    },
+    {
+      "name": "APIAuthToken",
+      "label": "API Auth Token",
+      "type": "Secure Text",
+      "placeholder": "Bearer xxxxx"
+    },
+    {
+      "name": "KV_StatusColor",
+      "label": "Key/Value: status→color",
+      "type": "Key Value Pair",
+      "placeholder": "Not started:#6c757d;In progress:#0d6efd;Completed:#198754"
+    },
+    {
+      "name": "ThemeColor",
+      "label": "Brand color",
+      "type": "Color",
+      "default": "#0f3b5f"
+    },
+    {
+      "name": "ExternalCSS",
+      "label": "Custom CSS URL",
+      "type": "External",
+      "placeholder": "https://example.com/custom.css"
+    }
   ]
 }
