@@ -1,50 +1,45 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Status Table Widget</title>
-    <link rel="stylesheet" href="widget.css" />
+  <meta charset="utf-8" />
+  <title>Status Table Widget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Jotform Custom Widget runtime -->
+  https://js.jotform.com/JotFormCustomWidget.min.js</script>
+
+  <!-- Widget styles -->
+  ./widget.css
 </head>
-
 <body>
-    <div class="status-table-wrapper">
-        <table class="status-table">
-            <!-- Prevent column 1 from collapsing -->
-            <colgroup>
-                <col style="width: 56%" />
-                <col style="width: 24%" />
-                <col style="width: 20%" />
-            </colgroup>
+  <div id="app" class="p-wrapper">
+    <header class="p-header">
+      <h1 id="title">Status Table</h1>
+      <p class="p-sub">Rich HTML | Single-choice status | Auto/back-datable date</p>
+    </header>
 
-            <thead>
-                <tr>
-                    <th>Task</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-
-            <tbody id="stw-body">
-                <!-- JS will populate rows -->
-            </tbody>
-        </table>
+    <div id="table-host" class="p-card">
+      <table id="grid" class="p-table">
+        <thead>
+          <tr>
+            <th id="th-col1">Item / Requirement</th>
+            <th id="th-col2">Status</th>
+            <th id="th-col3">Date</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
     </div>
 
-    <script src="widget.js"></script>
+    <footer class="p-footer">
+      <div id="helper" class="p-helper">
+        Changes are saved to the form draft automatically when you use “Save &amp; Continue later”.
+      </div>
+    </footer>
+  </div>
 
-    <script>
-        // Your actual list of tasks for Column 1
-        const TASKS = [
-            "Collect Employee’s Name in Pathways",
-            "Send Induction Email",
-            "Issue Logins",
-            "Complete Onboarding Checklist",
-            "Introduce Manager"
-        ];
-
-        window.StatusTableWidget.init({ tasks: TASKS });
-    </script>
+  <!-- Widget logic -->
+  ./widget.js</script>
 </body>
 </html>
